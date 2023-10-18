@@ -1,7 +1,8 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const mongodb = require('./db/connect');
-const cors = require('cors');
+const express = require("express");
+const bodyParser = require("body-parser");
+const mongodb = require("./db/connect");
+const cors = require("cors");
+const createError = require("http-errors");
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -12,13 +13,25 @@ app
   .use(bodyParser.urlencoded({ extended: false }))
   .use(express.json())
   .use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader("Access-Control-Allow-Origin", "*");
     next();
   })
-  .use('/', require('./routes'));
+  .use("/", require("./routes"))
 
-  process.on('uncaughtException', (err, origin) => {
-    console.log(process.stderr.fd, `Caught exception: ${err}\n` + `Exception origin: ${origin}`);
+  //404 handler and pass to error handler
+  .use((req, res, next) => {
+    next(createError(404, "Not found"));
+  })
+
+  //Error handler
+  .use((err, req, res, next) => {
+    res.status(err.status || 500);
+    res.send({
+      error: {
+        status: err.status || 500,
+        message: err.message
+      }
+    });
   });
 
 mongodb.initDb((err) => {

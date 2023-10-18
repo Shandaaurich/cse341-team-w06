@@ -12,7 +12,7 @@ const corsOptions = {
 
 router.get('/', cors(corsOptions), contactsController.getAll);
 
-router.get('/:id', cors(corsOptions), idValidationRule(), validate, contactsController.getSingle);
+router.get('/:id', cors(corsOptions), contactsController.getSingle);
 
 router.post('/', cors(corsOptions), contactsValidationRule(), validate, contactsController.createContact);
 

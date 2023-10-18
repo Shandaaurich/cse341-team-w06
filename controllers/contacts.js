@@ -1,6 +1,7 @@
 const mongodb = require('../db/connect');
 const ObjectId = require('mongodb').ObjectId;
-const HttpStatus = require("../exceptions/httpStatusCodes.js")
+const HttpStatus = require("../exceptions/httpStatusCodes.js");
+const createError = require("http-errors");
 
 const getAll = async (req, res, next) => {
   try {
@@ -18,8 +19,14 @@ const getAll = async (req, res, next) => {
 const getSingle = async (req, res, next) => {
   try {
     const userId = new ObjectId(req.params.id);
+    console.log("getSingle: userId: " + userId);
     const result = await mongodb.getDb().db().collection('contacts').find({ _id: userId });
+    console.log("getSingle" + JSON.stringify(result));
     result.toArray().then((lists) => {
+      console.log("getSingle" + JSON.stringify(lists));
+      if(lists.length === 0) {
+        return next(createError(400, "Contact does not exist"));
+      }
       res.setHeader('Content-Type', 'application/json');
       res.status(HttpStatus.OK).json(lists[0]);
     });
